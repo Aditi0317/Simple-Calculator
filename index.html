@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+        }
+
+        .calculator {
+            width: 340px;
+            padding: 25px;
+            border-radius: 22px;
+            background: #1e293b;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .display {
+            width: 100%;
+            height: 85px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            background: #0f172a;
+            color: white;
+            text-align: right;
+            font-size: 32px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            height: 60px;
+            border: none;
+            border-radius: 12px;
+            background: #334155;
+            color: white;
+            font-size: 21px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #475569;
+            transform: scale(1.04);
+        }
+
+        .operator {
+            background: #0d9488;
+        }
+
+        .operator:hover {
+            background: #0f766e;
+        }
+
+        .clear {
+            background: #e05252;
+        }
+
+        .clear:hover {
+            background: #c03939;
+        }
+
+        .equal {
+            background: #f59e0b;
+            grid-column: span 2;
+        }
+
+        .equal:hover {
+            background: #d97706;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+
+        .footer {
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="calculator">
+
+        <h2>MY CALCULATOR</h2>
+
+        <input type="text" class="display"
+               id="display" value="0" readonly>
+
+        <div class="buttons">
+
+            <button class="clear" onclick="clearDisplay()">AC</button>
+            <button onclick="deleteNumber()">DEL</button>
+            <button class="operator" onclick="appendOperator('%')">%</button>
+            <button class="operator" onclick="appendOperator('/')">÷</button>
+
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="appendOperator('*')">×</button>
+
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="appendOperator('-')">−</button>
+
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="appendOperator('+')">+</button>
+
+            <button class="zero" onclick="appendNumber('0')">0</button>
+            <button onclick="appendDecimal()">.</button>
+            <button class="equal" onclick="calculate()">=</button>
+
+        </div>
+
+        <div class="footer">
+            Simple Calculator | HTML CSS JavaScript
+        </div>
+
+    </div>
+
+<script>
+
+    let expression = "";
+    let display = document.getElementById("display");
+
+    // Update calculator display
+    function updateDisplay() {
+        display.value = expression || "0";
+    }
+
+    // Add number to expression
+    function appendNumber(number) {
+        expression += number;
+        updateDisplay();
+    }
+
+    // Add mathematical operator
+    function appendOperator(operator) {
+        if (expression === "") return;
+
+        if (/[+\-*/%]$/.test(expression)) {
+            expression = expression.slice(0, -1);
+        }
+
+        expression += operator;
+        updateDisplay();
+    }
+
+    // Add decimal point
+    function appendDecimal() {
+        let currentNumber = expression.split(/[+\-*/%]/).pop();
+
+        if (!currentNumber.includes(".")) {
+            expression += ".";
+            updateDisplay();
+        }
+    }
+
+    // Clear complete expression
+    function clearDisplay() {
+        expression = "";
+        updateDisplay();
+    }
+
+    // Delete last character
+    function deleteNumber() {
+        expression = expression.slice(0, -1);
+        updateDisplay();
+    }
+
+    // Calculate mathematical expression
+    function calculate() {
+        try {
+            if (!expression || /[+\-*/%.]$/.test(expression)) {
+                display.value = "Invalid Input";
+                expression = "";
+                return;
+            }
+
+            if (/\/0(?:\.0*)?(?![\d.])/.test(expression)) {
+                display.value = "Cannot divide by zero";
+                expression = "";
+                return;
+            }
+
+            if (!/^[0-9+\-*/%. ]+$/.test(expression)) {
+                throw new Error("Invalid input");
+            }
+
+            let result = Function(
+                '"use strict"; return (' + expression + ')'
+            )();
+
+            if (!Number.isFinite(result)) {
+                throw new Error("Invalid calculation");
+            }
+
+            expression = String(
+                Number(result.toPrecision(12))
+            );
+
+            updateDisplay();
+
+        } catch (error) {
+            display.value = "Error";
+            expression = "";
+        }
+    }
+
+    // Keyboard support
+    document.addEventListener("keydown", function(event) {
+
+        if (/^[0-9.]$/.test(event.key)) {
+            if (event.key === ".") {
+                appendDecimal();
+            } else {
+                appendNumber(event.key);
+            }
+        }
+
+        else if (["+", "-", "*", "/", "%"].includes(event.key)) {
+            appendOperator(event.key);
+        }
+
+        else if (event.key === "Enter" || event.key === "=") {
+            calculate();
+        }
+
+        else if (event.key === "Backspace") {
+            deleteNumber();
+        }
+
+        else if (event.key === "Escape") {
+            clearDisplay();
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

@@ -6,7 +6,7 @@ This is a simple calculator web application created using HTML,CSS and JavaScrip
 ## Technologies Used
 -HTML
 -CSS
-JavaScript
+-JavaScript
 
 ##Features
 -Addition
